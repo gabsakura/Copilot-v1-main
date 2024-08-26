@@ -1,6 +1,7 @@
 from funcoes_carplay import *
 import google.generativeai as genai
 
+# Configure a chave da API do Google
 GOOGLE_API_KEY = "AIzaSyCIB3tPjLXhZmPh2BuPqdBY2bGMUm0z3BQ"
 genai.configure(api_key=GOOGLE_API_KEY)
 
@@ -92,16 +93,17 @@ personalidade_escolhida = escolher_personalidade()
 prompt_base = definir_personalidade(personalidade_escolhida)
 
 # Prompt inicial baseado na personalidade escolhida
-promt = (
+prompt = (
     prompt_base +
     " Se o usuário digitar seu nome, responda apenas com 'Sim'. "
     "Exemplo ao pedir uma música: 'Toque [Nome da música]' ou 'Toque [Nome da música] da banda [Nome da banda]'. "
     "Exemplo ao pedir rota: 'Trace a rota para [Destino]' ou 'Leve-me para [Destino]', nesse caso responda 'Traçando rota para [Destino].' "
     "Exemplo ao pedir uma ligação: 'Ligue para [Nome da pessoa]', nesse caso responda 'Ligando para [Nome da pessoa]'. "
-    "Exemplo ao pedir uma tradução: 'Traduza essa [Frase pedida] da ['Lingua pedida']' neste caso responda ' A frase traduzida ficaria [Frase traduzida para a lingua]"
+    "Exemplo ao pedir uma tradução: 'Traduza essa [Frase pedida] da ['Lingua pedida']' neste caso responda 'A frase traduzida ficaria [Frase traduzida para a língua]'."
     "Se você receber a palavra 'Oi', e apenas essa palavra, responda com 'Olá. Sou seu Copilot na viagem de hoje. Caso queira ouvir uma música, fazer uma ligação ou ver informações do veículo, é só me pedir.'"
 )
 
+# Criar o modelo generativo com as configurações e ferramentas
 model = genai.GenerativeModel(
     model_name="gemini-1.0-pro",
     generation_config=generation_config,
@@ -109,6 +111,7 @@ model = genai.GenerativeModel(
     tools=[musica, encontrar_rota, ligacao, informacoes_veiculo]
 )
 
+# Iniciar o chat com o modelo
 chat = model.start_chat(enable_automatic_function_calling=True, history=[])
 
 # Função para enviar mensagem e gerar resposta
@@ -119,6 +122,6 @@ def enviar_mensagem(mensagem: str) -> str:
     :return: Uma string que representa a resposta da IA.
     """
     print(f"Mensagem enviada: {mensagem}")
-    resposta = chat.send_message(mensagem)
+    resposta = chat.send_message(prompt + mensagem)
     print(f"Resposta gerada: {resposta.text}")
     return resposta.text
