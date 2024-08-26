@@ -1,19 +1,16 @@
 # ----- Importações -----
 from tkinter import *
-from Copilot_AI_v1 import enviar_mensagem, escolher_personalidade
+from Copilot_AI_v1 import enviar_mensagem
 from PIL import Image, ImageTk
 import speech_recognition as sr
 import pyttsx3
 import os
 import shutil
 
-# ----- Configuração inicial -----
-personalidade_escolhida = escolher_personalidade()
-
 # ----- Janela principal -----
 janela_principal = Tk()
 janela_principal.title("Copilot")
-janela_principal.geometry("650x490")
+janela_principal.geometry("650x550")
 janela_principal.resizable(False, False)
 janela_principal.config(background="#565863")
 
@@ -23,61 +20,85 @@ canvas.place(x=0, y=0)
 canvas.create_rectangle(0, 0, 650, 350, fill="black")
 
 # ------ Restaura as imagens da pasta 'telas' ------
-def restaurar_imagens() -> None:
-    caminho = "telas"
-    pasta = os.listdir(caminho)
-    for arquivo in pasta:
-        if arquivo != "informações.png":
-            os.remove(f"{caminho}/{arquivo}")
+caminho = "telas"
+pasta = os.listdir(caminho)
+for arquivo in pasta:
+    if arquivo != "informações.png":
+        os.remove(f"{caminho}/{arquivo}")
 
-    caminho_backup = "telas_backup"
-    pasta_backup = os.listdir(caminho_backup)
-    for arquivo in pasta_backup:
-        shutil.copyfile(f"{caminho_backup}/{arquivo}", f"{caminho}/{arquivo}")
+caminho = "telas_backup"
+pasta = os.listdir(caminho)
+for arquivo in pasta:
+    shutil.copyfile(f"{caminho}/{arquivo}", f"telas/{arquivo}")
 
-restaurar_imagens()
 
 # -------- Funções para ações dos botões ------
-def exibir_imagem(nome_arquivo: str) -> None:
+def funcao_botao1() -> None:
     """
-    Exibe a imagem especificada no canvas.
-    :param nome_arquivo: Nome do arquivo de imagem a ser exibido.
+    Exibe a imagem 'spotify.png' no canvas criado.
     :return: None
     """
     global canvas
     canvas.delete("all")
 
-    # Carrega a imagem e exibe no canvas
-    caminho_imagem = f"telas/{nome_arquivo}"
-    imagem = Image.open(caminho_imagem)
+    # Carrega a imagem e axibe no canvas
+    imagem = Image.open("telas/spotify.png")
     imagem_tk = ImageTk.PhotoImage(imagem)
     canvas.create_image(0, 0, anchor=NW, image=imagem_tk)
     canvas.image = imagem_tk
 
 
-def funcao_botao1() -> None:
-    exibir_imagem("spotify.png")
-
-
 def funcao_botao2() -> None:
-    exibir_imagem("mapa.png")
+    """
+    Exibe a imagem 'mapa.png' no canvas criado.
+    :return: None
+    """
+    global canvas
+    canvas.delete("all")
+
+    # Carrega a imagem e axibe no canvas
+    imagem = Image.open("telas/mapa.png")
+    imagem_tk = ImageTk.PhotoImage(imagem)
+    canvas.create_image(0, 0, anchor=NW, image=imagem_tk)
+    canvas.image = imagem_tk
 
 
 def funcao_botao3() -> None:
-    exibir_imagem("ligação.png")
+    """
+    Exibe a imagem 'ligação.png' no canvas criado
+    :return: None
+    """
+    global canvas
+    canvas.delete("all")
+
+    # Carrega a imagem e axibe no canvas
+    imagem = Image.open("telas/ligação.png")
+    imagem_tk = ImageTk.PhotoImage(imagem)
+    canvas.create_image(0, 0, anchor=NW, image=imagem_tk)
+    canvas.image = imagem_tk
 
 
 def funcao_botao4() -> None:
-    exibir_imagem("informações.png")
+    """
+    Exibe a imagem 'informações.png' no canvas criado
+    :return: None
+    """
+    global canvas
+    canvas.delete("all")
+
+    # Carrega a imagem e axibe no canvas
+    imagem = Image.open("telas/informações.png")
+    imagem_tk = ImageTk.PhotoImage(imagem)
+    canvas.create_image(0, 0, anchor=NW, image=imagem_tk)
+    canvas.image = imagem_tk
 
 
 def falar(resposta: str) -> None:
     """
-    Recebe uma frase e configura a voz que falará a frase.
-    :param resposta: Uma string que a IA falará.
+    Recebe uma frase e configura a voz que falará a frase
+    :param resposta: Uma string que a IA falará
     :return: None
     """
-    # Decide a imagem a ser exibida com base na resposta
     if "tocando" in resposta.lower():
         funcao_botao1()
     elif "rota" in resposta.lower():
@@ -91,7 +112,7 @@ def falar(resposta: str) -> None:
     engine = pyttsx3.init()
     engine.setProperty('rate', 250)
 
-    # Define a voz a ser usada
+    # Define a voz ser usar
     voz = engine.getProperty('voices')
     engine.setProperty('voice', voz[0].id)
 
@@ -103,8 +124,8 @@ def falar(resposta: str) -> None:
 # ------ Função para ação da barra de espaço ------
 def espaco_apertado(event) -> None:
     """
-    Ativa o microfone, permitindo ao usuário conversar com a IA.
-    :param event: Evento, que no caso é a 'barra de espaço' ser pressionada.
+    Ativa o microfone, permitindo o usuário de conversar com a IA
+    :param event: Evento, que no caso é a 'barra de espaço' ser precionado
     :return: None
     """
     r = sr.Recognizer()
@@ -115,24 +136,20 @@ def espaco_apertado(event) -> None:
         audio = r.listen(fonte)
 
         try:
-            fala = r.recognize_google(audio, language='pt-BR').lower()
-            print(f"Você disse: {fala}")
-            resposta = enviar_mensagem(fala)
-            falar(resposta)
+            falar(enviar_mensagem(r.recognize_google(audio, language='pt-BR').lower(), personalidade.get()))
+            print(r.recognize_google(audio, language='pt-BR').lower())
         except sr.UnknownValueError:
             print("Não foi possível entender a fala")
-        except sr.RequestError as e:
-            print(f"Erro ao tentar acessar o serviço de reconhecimento de fala; {e}")
 
 
 # ------ Função para carregar e redimensionar as imagens dos ícones ------
-def carregar_e_redimensionar_imagem(caminho_imagem: str, largura: int, altura: int) -> ImageTk.PhotoImage:
+def carregar_e_redimensionar_imagem(caminho_imagem, largura, altura) -> None:
     """
-    Carrega e redimensiona as imagens da pasta ícone nos respectivos botões.
-    :param caminho_imagem: Uma string que representa o caminho para as imagens.
-    :param largura: A largura do botão.
-    :param altura: A altura do botão.
-    :return: Um objeto ImageTk.PhotoImage redimensionado.
+    Carerga e redimensiona as imagens da pasta ícone nos respectivos botões
+    :param caminho_imagem: Uma string que representa o caminho para as imagens
+    :param largura: A largura do botão
+    :param altura: A altura do botão
+    :return: None
     """
     imagem = Image.open(caminho_imagem)
     imagem_redimensionada = imagem.resize((largura, altura))
@@ -154,6 +171,17 @@ for i in range(4):
     icone = carregar_e_redimensionar_imagem(icones[i], 100, 100)
     botao.config(image=icone, compound=TOP)
     botao.image = icone  # Manter uma referência para evitar a coleta de lixo
+
+# ------ Caixa de seleção para personalidade da IA ------
+opcoes_personalidade = ["Agressivo", "Amigável", "Maduro", "Criança", "Passivo-agressivo"]
+personalidade = StringVar(janela_principal)
+personalidade.set(opcoes_personalidade[0])  # Valor padrão
+
+label_personalidade = Label(janela_principal, text="Escolha a personalidade da IA:", bg="#565863", fg="white")
+label_personalidade.place(x=200, y=460)
+
+menu_personalidade = OptionMenu(janela_principal, personalidade, *opcoes_personalidade)
+menu_personalidade.place(x=400, y=455)
 
 # ------ Vincula evento de teclado para a barra de espaço ------
 janela_principal.bind("<space>", espaco_apertado)
